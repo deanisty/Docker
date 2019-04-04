@@ -21,7 +21,7 @@ Docker通过虚拟容器技术，使应用程序更加安全的隔离运行，�
 
 #### 实践
 
-* [Docker的安装](install.md)
+* [Docker的安装](https://github.com/deanisty/Train-PHP/tree/master/docker)
 * [Docker镜像操作](cmd-image.md)
 * [Docker容器操作](cmd-container.md)
 * [Docker网络操作](net.md)
