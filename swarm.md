@@ -8,3 +8,4 @@ Docker Swarm 是一个原生的Docker集群管理工具，Swarm将一组Docker�
 
 ### 创建Swarm集群
 
+集群发现服务  consul etcd zookeeper
