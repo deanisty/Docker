@@ -17,3 +17,10 @@ docker 在 Docker Engine 1.10(2016-02-04)引入了 Linux 用户名称空间的�
 
 * [开启docker 中的User Namespace 来解决权限问题](https://www.binss.me/blog/solve-docker-permission-problem-by-using-user-namespace/)
 * [Isolate containers with a user namespace](https://docs.docker.com/engine/security/userns-remap/)
+
+
+#### 问题
+
+##### 设置命名空间映射之后导致容器运行失败
+
+[解决方案](https://success.docker.com/article/user-namespace-runtime-error)
