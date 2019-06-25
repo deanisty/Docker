@@ -28,12 +28,17 @@ warning: ptrace: Operation not permitted
 During startup program exited with code 127.
 ```
 
+#### Error disabling address space randomization
+
+禁用地址空间随机化失败（gdb 应该是需要这个特性来操作程序堆栈的地址），原因是容器内的linux系统默认开启了 seccomp （Secure computing mode）
+通过 `--security-opt seccomp=unconfined` 选项修改来开启权限
+
+[官方文档：Seccomp security profiles for Docker](https://docs.docker.com/engine/security/seccomp/)
+
+
 #### ptrace: Operation not permitted
 
-原因大概（猜测）是因为在容器环境中关闭了 ptrace 的功能，因此需要在启动容器时增加选项，开启 ptrace 权限
 
-```SHELL 
-docker run -dit --name php7 -v /data/php7/:/data/php7 -w /data/php7 --cap-add=SYS_PTRACE deepdoo/php:7.0.12 /bin/bash
-```
+原因大概（猜测）是因为在容器环境中关闭了 ptrace 的功能，因此需要在启动容器时增加选项 `docker run --cap-add=SYS_PTRACE`，开启 ptrace 权限
 
-[也可以看这里](https://www.jianshu.com/p/3c2af8893936)
+[官方文档：搜索 SYS_PTRACE ](https://docs.docker.com/engine/reference/run/)
