@@ -19,3 +19,13 @@
 修改 php.ini memory_limit = xxM 调整内容到一个合适的值即可
 
 另外 composer install/update -vvv 命令可以看到具体执行的日志 便于调试
+
+#### docker 容器中使用 composer install 报 proc_open Out out memory 异常
+
+执行  
+
+```Shell
+composer install --prefer-dist -vvv ???? 
+```
+
+这样可以成功，但是为什么
