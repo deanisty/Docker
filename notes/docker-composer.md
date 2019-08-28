@@ -9,3 +9,13 @@
 ##### 定义 service 的是 image 指令 不是 build ，所以不论怎么改
 
 对应目录下的 Dockerfile 都不会触发重新编译，太坑了！！！！
+
+#### docker 容器中使用 composer install/update 直接被 killed
+
+通过 docker stats 容器名 实时查看容器占用资源情况
+
+如果内存使用量并未超过 最大内容容量  则应该是 php 限制了程序使用内存太小
+
+修改 php.ini memory_limit = xxM 调整内容到一个合适的值即可
+
+另外 composer install/update -vvv 命令可以看到具体执行的日志 便于调试
