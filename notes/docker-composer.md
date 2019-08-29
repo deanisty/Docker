@@ -1,7 +1,8 @@
-## 使用 docker-composer 期间遇到的问题及解决方案
+# 使用 docker-composer 期间遇到的问题及解决方案
 
-
-#### docker-composer up -d --build 不重新编译的问题
+docker-composer up -d --build 不重新编译的问题
+--------------
+**********
 
 这个问题遇到过两次，后来发现是 
 从 git 仓库中拉出来的 docker-composer 项目中的 yml 文件中
@@ -10,7 +11,9 @@
 
 对应目录下的 Dockerfile 都不会触发重新编译，太坑了！！！！
 
-#### docker 容器中使用 composer install/update 直接被 killed
+docker 容器中使用 composer install/update 直接被 killed
+--------------
+**********
 
 通过 docker stats 容器名 实时查看容器占用资源情况
 
@@ -20,7 +23,9 @@
 
 另外 composer install/update -vvv 命令可以看到具体执行的日志 便于调试
 
-#### docker 容器中使用 composer install 报 proc_open Out out memory 异常
+docker 容器中使用 composer install 报 proc_open Out out memory 异常
+--------------
+**********
 
 执行  
 
@@ -35,7 +40,9 @@ composer install --prefer-dist -vvv ????
 >--prefer-source would try to clone and keep the whole VCS repository of the dependencies when available. This is useful when you want >to have the original VCS repositories cloned in your vendor/ folder. E.g. you might want to work on the dependencies - modify them, >fork them, submit pull requests etc. while also using them as part of the bigger project which requires them in the first place.
 
 
-#### docker 容器 npm dev 服务无法访问 connection refused
+docker 容器 npm dev 服务无法访问 connection refused
+--------------
+**********
 
 在 docker 容器中使用  npm run dev 启动 dev 服务器成功，并且容器 8080端口也映射到 主机 8080 端口，但是服务无法访问
 
