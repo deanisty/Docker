@@ -60,3 +60,32 @@ dfbdab04e01b        node               "docker-entrypoint.s…"   13 minutes ago
 2. 端口映射  0.0.0.0:8080->8080/tcp 指令会把容器外部机器的所有端口流量都重定向到容器的外部网络接口上，也就是 eth0 端口，但是跟容器的127.0.0.1端口
    没关系，所以无法访问到
 3. 因此要调整 npm dev 服务器监听的地址为：0.0.0.0:8080 这样dev服务器会同时监听容器的对外网络接口，就能访问到了
+
+
+docker 镜像使用 docker-compose启动无法存活
+--------------------
+**************
+
+某些镜像默认设置了 ENTRYPOINT 或者 CMD 指令用于启动容器时运行命令，但是某些情况下我们不想运行指定的命令，只想用 bash/sh 启动之，但是如果只是在
+Dockerfile 中重写 ENTRYPOINT 或者 CMD 指令 为 ["bash"] 可能容器被启动后立即就退出了，具体原因没有深入探究.
+
+如果使用 docker exec -it xxx bash 这样肯定是可以启动容器的，类似的在  composefile 中增加一个 [tty:ture]的指令 可以达到类似 docker exec -t 的
+效果，这样也是可以启动 bash 的
+
+下面是 compose 文件中的相应内容
+
+```SHELL
+### node container ###########################################
+    node:
+      build: "./node"
+      ports:
+        - "${NODE_PORT}:8080"
+      volumes:
+        - ${APPLICATION}:/var/www
+      working_dir: /var/www/gloryfront
+      #command: bash -c "
+      #  cnpm install && cnpm run dev"
+      tty: true
+      networks:
+        - frontend
+```
