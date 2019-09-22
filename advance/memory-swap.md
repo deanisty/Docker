@@ -249,3 +249,57 @@ Linux 通过 CFS（Completely Fair Scheduler，完全公平调度器）来调度
 
 例如：
 
+```SHELL
+$ docker run -it --cpu-period=50000 --cpu-quota=25000 ubuntu:16.04 /bin/bash
+```
+
+将 CFS 调度的周期设为 50000，将容器在每个周期内的 CPU 配额设置为 25000，表示该容器每 50ms 可以得到 50% 的 CPU 运行时间。
+
+```SHELL
+$ docker run -it --cpu-period=10000 --cpu-quota=20000 ubuntu:16.04 /bin/bash
+```
+
+将容器的 CPU 配额设置为 CFS 周期的两倍，CPU 使用时间怎么会比周期大呢？其实很好解释，给容器分配两个 vCPU 就可以了。该配置表示容器可以在每个周期内使用两个 vCPU 的 100% 时间。
+
+CFS 周期的有效范围是 1ms~1s，对应的--cpu-period的数值范围是 1000~1000000。而容器的 CPU 配额必须不小于 1ms，即--cpu-quota的值必须 >= 1000。可以看出这两个选项的单位都是 us。
+
+正确的理解“绝对”
+注意前面我们用--cpu-quota设置容器在一个调度周期内能使用的 CPU 时间时实际上设置的是一个上限。并不是说容器一定会使用这么长的 CPU 时间。比如，我们先启动一个容器，将其绑定到 cpu 1 上执行。给其--cpu-quota和--cpu-period都设置为 50000。
+
+```SHELL
+$ docker run --rm --name test01 --cpu-cpus 1 --cpu-quota=50000 --cpu-period=50000 deadloop:busybox-1.25.1-glibc
+```
+
+调度周期为 50000，容器在每个周期内最多能使用 50000 cpu 时间。
+
+再用docker stats test01可以观察到该容器对 CPU 的使用率在100%左右。然后，我们再以同样的参数启动另一个容器。
+
+```SHELL
+$ docker run --rm --name test02 --cpu-cpus 1 --cpu-quota=50000 --cpu-period=50000 deadloop:busybox-1.25.1-glibc
+```
+
+再用docker stats test01 test02可以观察到这两个容器，每个容器对 cpu 的使用率在 50% 左右。说明容器并没有在每个周期内使用 50000 的 cpu 时间。
+
+使用docker stop test02命令结束第二个容器，再加一个参数-c 2048启动它：
+
+```SHELL
+$ docker run --rm --name test02 --cpu-cpus 1 --cpu-quota=50000 --cpu-period=50000 -c 2048 deadloop:busybox-1.25.1-glibc
+```
+
+再用docker stats test01命令可以观察到第一个容器的 CPU 使用率在 33% 左右，第二个容器的 CPU 使用率在 66% 左右。因为第二个容器的共享值是 2048，第一个容器的默认共享值是 1024，所以第二个容器在每个周期内能使用的 CPU 时间是第一个容器的两倍。
+
+
+
+## 结束语
+
+有了这些知识之后，我可以解决文章开头的 go 示例程序无法运行的问题了，办法就是启动容器时增加 -m 200M 和 --memory-swap=-1 参数：
+
+```SHELL
+docker run -td --name go -v /home/caoyu/data/golearn/:/go -m 200M --memory-swap=-1 golang bash
+```
+
+由于我的云服务器内存总共只有1G，而且可用内存仅剩 300M了，所以只能设置 200M的内存给 go 容器，不过 通过设置 --memory-swap=-1 可用让容器享受主机的
+交换内存，我在启动容器之前，在主机上设置了 2G 的交换内存空间，这样，当 go 程序运行时就可以额外使用 2G 的交换内存了，这样怎么也够了吧！
+
+=========END=========
+
