@@ -128,8 +128,18 @@ $ iptables -I DOCKER-USER -i src_if -o dst_if -j ACCEPT
 
 #### 阻止 Docker 操作 iptables
 
+It is possible to set the `iptables` key to `false` in the Docker engine’s configuration file at `/etc/docker/daemon.json`,
+but this option is not appropriate for most users. 
+It is not possible to completely prevent Docker from creating iptables rules, and creating them after-the-fact is extremely
+involved and beyond the scope of these instructions. Setting iptables to false will more than likely break container
+networking for the Docker engine.
+
 
 #### 设置容器默认绑定地址
+
+By default, the Docker daemon will expose ports on the 0.0.0.0 address, i.e. any address on the host. If you want to change
+that behavior to only expose ports on an internal IP address, you can use the --ip option to specify a different IP address.
+However, setting --ip only changes the `default`, it does not restrict services to that IP.
 
 
 
