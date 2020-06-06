@@ -75,3 +75,49 @@ RETURN     all  --  anywhere             anywhere
 
 在Linux系统中，Docker通过操作 iptables 规则来提供网络隔离功能。这是一个实现上的细节，一般情况下你不应该修改 Docker 对 iptables 策略新增的规则，
 但是如果你想额外再定制规则的话，这可能会有一定的影响。
+
+如果运行 docker 的主机暴露在外网环境下，可能会需要使用 iptables 来阻止未授权的访问，尤其是对于容器中服务的访问。
+
+#### 在 Docker 规则之前添加iptables 规则
+
+Docker 添加了两个自定义的iptables 规则链：DOCKER-USER 和 DOCKER，以此来保证所有入网的流量包都首先通过这两个规则的检查。
+所有 Docker 的 iptables 规则都会被添加到 DOCKER 规则链中。不要手动操作这个规则链。如果你想在 Docker 的规则之前添加规则，可以添加到 DOCKER-USER
+中。这些规则会在任何 Docker 自动创建的规则之前被使用。
+
+在 Forward 规则链中的规则，不管是手动添加的或者其他基于 iptables 的防火墙应用添加的，会在上述的规则链后面才会被使用。
+这就意味着通过 Docker 暴露的端口会无视防火墙的任何配置，因此，如果你希望阻止某个端口通过 Docker 被暴露出来，
+必须在 DOCKER-USER 规则链中添加对应的规则。
+
+##### 限制对 Docker 机器的连接
+
+默认情况下，任何外部主机都允许直接联入 Docker 容器，为了仅允许特定的 IP 或者网段访问容器，可以插入一个 DROP 规则在 DOCKER-USER 链中，如下，限制
+外部所有主机的访问，`192.168.1.1` 除外：
+
+```SHELL
+$ iptables -I DOCKER-USER -i ext_if ! -s 192.168.1.1 -j DROP
+
+````
+你需要修改 ext_if 的值为对应外部端口的 IP 地址，同样，也可以设置一个网段：
+
+```SHELL
+$ iptables -I DOCKER-USER -i ext_if ! -s 192.168.1.0/24 -j DROP
+
+```
+
+最后，你也可以指定一个接受的 IP 地址的范围通过使用 `--src-range` (--src-range 和 --dst-range 需要配合 -m iprange 一起使用)
+
+```SHELL
+$ iptables -I DOCKER-USER -m iprange -i ext_if ! --src-range 192.168.1.1-192.168.1.3 -j DROP
+
+```
+
+你可以组合 -s 或者 --src-range 和 -d 或者 --dst-range 来同时控制源 IP 和 目的 IP，例如，你的 Docker daemon 同时监听了 `192.168.1.99`和
+`10.1.2.3`，你可以对 `10.1.2.3` 指定规则，而 `192.168.1.99` 保持开放。
+
+`iptables` 更加复杂的应用不是本文的重点。可以通过这里了解更多：[ Netfilter.org HOWTO](https://www.netfilter.org/documentation/HOWTO/NAT-HOWTO.html)
+
+
+
+
+
+
