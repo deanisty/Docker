@@ -117,6 +117,28 @@ $ iptables -I DOCKER-USER -m iprange -i ext_if ! --src-range 192.168.1.1-192.168
 `iptables` 更加复杂的应用不是本文的重点。可以通过这里了解更多：[ Netfilter.org HOWTO](https://www.netfilter.org/documentation/HOWTO/NAT-HOWTO.html)
 
 
+#### Docker On a router
+
+Docker也会在 FORWARD 规则链中设置 DROP 策略。如果 Docker 所在的主机同时也作为一个路由主机，那么这会导致这台主机不会转发任何流量。
+可以通过在 DOCKER-USER 链中显示指定 ACCEPT 规则来允许转发：
+
+```SHELL
+$ iptables -I DOCKER-USER -i src_if -o dst_if -j ACCEPT
+```
+
+#### 阻止 Docker 操作 iptables
+
+
+#### 设置容器默认绑定地址
+
+
+
+
+
+
+
+
+
 
 
 
