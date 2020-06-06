@@ -73,3 +73,5 @@ RETURN     all  --  anywhere             anywhere
 
 > 翻译至官方文档：https://docs.docker.com/network/iptables/
 
+在Linux系统中，Docker通过操作 iptables 规则来提供网络隔离功能。这是一个实现上的细节，一般情况下你不应该修改 Docker 对 iptables 策略新增的规则，
+但是如果你想额外再定制规则的话，这可能会有一定的影响。
