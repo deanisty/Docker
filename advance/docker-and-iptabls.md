@@ -19,8 +19,57 @@ b0138c3ffbc8        mongo               "docker-entrypoint.s…"   About an hour
 
 ![mongodb](/advance/mongodb.jpg)
 
-其实，我的云服务器是开启了
+其实，我的云服务器是开启了iptables的，按理说如果黑客不攻破我主机的登陆用户名和密码是不可能侵入我的容器的，于是我检查了一下iptables列表，不幸的是我发现了很多docker添加的规则，其中有一条就是开放了 27017 端口给任何来源：
+
+```SHELL
+Chain INPUT (policy ACCEPT)
+target     prot opt source               destination
+ACCEPT     all  --  anywhere             anywhere             state RELATED,ESTABLISHED
+ACCEPT     all  --  anywhere             anywhere
+ACCEPT     icmp --  anywhere             anywhere
+ACCEPT     tcp  --  anywhere             anywhere             tcp dpt:http
+ACCEPT     tcp  --  anywhere             anywhere             tcp dpt:tr-rsrb-p3
+REJECT     all  --  anywhere             anywhere             reject-with icmp-port-unreachable
+
+Chain FORWARD (policy DROP)
+target     prot opt source               destination
+DOCKER-USER  all  --  anywhere             anywhere
+DOCKER-ISOLATION-STAGE-1  all  --  anywhere             anywhere
+ACCEPT     all  --  anywhere             anywhere             ctstate RELATED,ESTABLISHED
+DOCKER     all  --  anywhere             anywhere
+ACCEPT     all  --  anywhere             anywhere
+ACCEPT     all  --  anywhere             anywhere
+
+Chain OUTPUT (policy ACCEPT)
+target     prot opt source               destination
+
+Chain DOCKER (1 references)
+target     prot opt source               destination
+ACCEPT     tcp  --  anywhere             172.17.0.4           tcp dpt:http
+ACCEPT     tcp  --  anywhere             172.17.0.2           tcp dpt:27017
+
+Chain DOCKER-ISOLATION-STAGE-1 (1 references)
+target     prot opt source               destination
+DOCKER-ISOLATION-STAGE-2  all  --  anywhere             anywhere
+RETURN     all  --  anywhere             anywhere
+
+Chain DOCKER-ISOLATION-STAGE-2 (1 references)
+target     prot opt source               destination
+DROP       all  --  anywhere             anywhere
+RETURN     all  --  anywhere             anywhere
+
+Chain DOCKER-USER (1 references)
+target     prot opt source               destination
+RETURN     all  --  anywhere             anywhere
+```
+
+可算找到原因了，其实只要docker开启了主机和容器的端口映射，它就会在防火墙规则表里增加一条ACCEPT规则，所以防火墙其实对于docker来说没有任何用处，所有
+容器都暴露到外网环境了。
+
+一气之下，我找到了docker官方文档，研究了一下，下面是译文！
+
 
 #### Docker和iptables
 
 > 翻译至官方文档：https://docs.docker.com/network/iptables/
+
