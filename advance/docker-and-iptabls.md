@@ -14,10 +14,10 @@ b0138c3ffbc8        mongo               "docker-entrypoint.s…"   About an hour
 52b0b1e3f881        php                 "docker-php-entrypoi…"   4 days ago          Up 4 days                                      php
 ```
 
-本来都挺美好，不过，第二天晚上，当我用工具远程连到mongo容器的时候，发现我测试用的库都没了，只剩下一个 warning 库，这个库里有一个readme表，大概这样
-(事发当时我没截图，从网上找了一个类似的案例)
+本来都挺美好，不过，第二天晚上，当我用工具远程连到mongo容器的时候，发现我测试用的库都没了，只剩下一个名字叫 `README_TO_RECOVER_YOUR_DATA` 的库，
+这个库里只有一个readme表，大概长这样
 
-![mongodb](/advance/mongodb.jpg)
+![mongodb](/advance/mongo.PNG)
 
 其实，我的云服务器是开启了iptables的，按理说如果黑客不攻破我主机的登陆用户名和密码是不可能侵入我的容器的，于是我检查了一下iptables列表，不幸的是我发现了很多docker添加的规则，其中有一条就是开放了 27017 端口给任何来源：
 
